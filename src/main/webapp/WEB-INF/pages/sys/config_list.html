@@ -1,0 +1,184 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">配置管理</h3>
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="参数名">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+								<i class="fa fa-search"></i>
+							</button>
+
+							<button type="button" class="btn btn-default btn-delete">删除</button>
+							<button type="button" class="btn btn-default btn-add">添加</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<form>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th><input type="checkbox" id="checkAll">全选</th>
+								<th>参数名</th>
+								<th>参数值</th>
+								<th>创建日期</th>
+								<th>修改日期</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+						<tbody id="tbodyId">
+						</tbody>
+					</table>
+				</form>
+			</div>
+			<!-- /.box-body -->
+			<div id="pageId" class="box-footer clearfix"></div>
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+	$(function() {
+		$('#pageId').load("doPageUI.do", function() {
+			doGetObject();
+		});
+		//设置点击事件
+		$('.input-group-btn').on('click', '.btn-search', doQueryObjects);
+		$('thead').on('change','#checkAll',doCheckAll);
+		$('tbody').on('change','.cBox',doChangeCheckAllState);
+		$('.input-group-btn').on('click','.btn-delete',doDeleteObject);
+		$('.input-group-btn').on('click','.btn-add',doShowEditDialog);
+		$('#tbodyId').on('click','.btn-update',doShowEditDialog);
+	});
+	function doShowEditDialog(){
+		var url = 'config/doConfigEditUI.do';
+		var title;
+		if($(this).hasClass('btn-add')){
+			console.log('add');
+			title = '添加配置信息';
+		}else{
+			console.log('update');
+			title = '修改配置信息';
+			//获取当前行的数据
+			var rowData = $(this).parents('tr').data('rowData');
+			//将数据绑定到当前模态框
+			$('#myModal').data("rowData",rowData);
+		}
+		$('#myModal .modal-body').load(url,function(){
+			$('#myModalLabel').html(title);
+			//页面加载完成显示模态框
+			$('#myModal').modal('show');
+		});
+		
+	}
+	function doDeleteObject(){
+		//1.获取所选中checkbox的状态值
+		var array = doGetChecKedIds();
+		console.log("array:"+array);
+		//2.判定是否有值，没有值则给出提示
+		if(array.length==0){
+			alert('请选择要删除的选项！');
+			return;
+		}
+		//3.异步请求要删除的对象id值，并处理相应结果
+		var url = "config/doDeleteObjects.do";
+		var params = {"ids":array.toString()};
+		$.getJSON(url,params,function(result){
+			if(result.state==0){
+				//成功，重新刷新页面
+				doQueryObjects();
+				doChangeCheckAllState();
+				alert(result.message);
+			}else{
+				alert(result.message);
+			}
+		});
+	}
+	function doGetChecKedIds(){
+		var array = new Array();
+		$('.cBox').each(function(){
+			if($(this).prop('checked')){
+				array.push($(this).val());
+			}
+		});
+		return array;
+	}
+	function doChangeCheckAllState(){
+		//1.获取tbody中所有checkbox对象进行与运算
+		var flag = true;
+		$('.cBox').each(function(){
+			flag = flag&$(this).prop('checked');
+		});
+		$('#checkAll').prop('checked',flag);
+	}
+	function doCheckAll(){
+		var flag = $(this).prop("checked");
+		//迭代函数
+		$('.cBox').each(function(){
+			$(this).prop("checked",flag);
+		});
+	}
+	//查询数据并生成表格
+	function doGetObject() {
+		doCheckAll();
+		var pageCurrent = $('#pageId').data('pageCurrent');
+		var name = $('#searchNameId').val();
+		if (!pageCurrent) {
+			pageCurrent = 1;
+		}
+		var params = {
+			'pageCurrent' : pageCurrent,
+			'name' : name
+		};
+		var url = 'config/doFindPageObjects.do';
+		$.getJSON(url, params, function(result) {
+			console.log(result);
+			if (result.state == 0) {
+				doSetTableBodyRows(result.data.records);
+				doSetPagination(result.data);
+			} else {
+				alert(result.message);
+			}
+		});
+	}
+	function doSetTableBodyRows(records) {
+		//先将表格清空！
+		$('#tbodyId').empty();
+		for (var i in records) {
+			var config = records[i];
+			var tr = $('<tr></tr>');
+			var tds = $('<td><input type="checkbox" class="cBox" name="ids" value='+config.id+'></td>'
+					+ '<td>'+ config.name+ '</td>'
+					+ '<td>'+ config.value+ '</td>'
+					+ '<td>'+ new Date(config.createdTime).toLocaleDateString()+ '</td>'
+					+ '<td>'+ new Date(config.modifiedTime).toLocaleDateString()+ '</td>'
+					+ '<td><input type="button" class="btn btn-default btn-update" value="修改"></td>');
+			tr.data('rowData',records[i]);
+			tr.append(tds);
+			$('#tbodyId').append(tr);
+		}
+	}
+	function doQueryObjects() {
+		//将页数设置为首页
+		$('#pageId').data('pageCurrent', 1);
+		doGetObject();
+	}
+</script>
+
+
+
+
+
+
+
+
+
+
+

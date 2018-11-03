@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+	<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+		"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+	<mapper namespace="com.jt.sys.mapper.SysConfigMapper">
+		<!-- Integer deleteObjects(Integer... ids), -->
+		<delete id="deleteObjects">
+			DELETE FROM 
+				sys_config
+			WHERE 
+				id 
+			IN<!-- (1,2,3,4,5) -->
+			<foreach collection="ids"
+					 open="(" close=")" 
+					 separator=","
+					 item="item">
+				#{item}
+			</foreach>
+		</delete>
+		<!-- 提取sql元素共性，其他地方需要时加include -->
+		<sql id="queryWhereId">
+			<where>
+				<if test="name!=null and name!=''">
+				name like concat("%",#{name},"%")
+				</if>
+			</where>
+		</sql>
+		<!-- List<SysConfig> findPageObjects -->
+		<select id="findPageObjects" resultType="com.jt.sys.entity.SysConfig">
+			SELECT
+				 id,
+				 name,
+				 value,
+				 note,
+				 created_time createdTime,
+				 modified_time modifiedTime,
+				 created_user createdUser,
+				 modified_user modifiedUser
+			FROM
+				sys_config
+			<include refid="queryWhereId"/>
+			ORDER BY
+				createdTime desc
+			LIMIT
+				#{startIndex},#{pageSize}
+		</select>
+		<!-- Integer getRowCount(@Param("String") String name) -->
+		<select id="getRowCount" resultType="java.lang.Integer">
+			SELECT 
+				COUNT(*)
+			FROM
+				sys_config
+			<include refid="queryWhereId"/>
+		</select>
+		<!-- Integer insertObject(SysConfig sysConfig), -->
+		<insert id="insertObject" useGeneratedKeys="true"
+		keyProperty="id">
+			INSERT INTO 
+				sys_config(
+				 name,
+				 value,
+				 note,
+				 created_time,
+				 modified_time,
+				 created_user,
+				 modified_user
+			)VALUES(
+				 #{name},
+				 #{value},
+				 #{note},
+				 #{createdTime},
+				 #{modifiedTime},
+				 #{createdUser},
+				 #{modifiedUser}
+			)
+		</insert>
+		<!-- Integer updateObject(SysConfig sysConfig), -->
+		<update id="updateObject">
+			UPDATE
+				sys_config
+			SET
+				name = #{name},
+				value = #{value},
+				note = #{note},
+				modified_time = #{modifiedTime},
+				modified_user = #{modifiedUser}
+			WHERE
+				id = #{id}
+		</update>
+	</mapper>
+	
+	
+	
+	
+	
+	
+	
+	
+	
