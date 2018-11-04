@@ -2,7 +2,28 @@
 	<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
 		"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 	<mapper namespace="com.jt.sys.mapper.SysMenuMapper">
-		<!-- List<Map<String,Object>> findObjects(); -->
+		<!-- List<Node> findZtreeMenuNodes(), -->
+		<select id="findZtreeMenuNodes" resultType="com.jt.common.vo.Node">
+			SELECT
+				id,
+				name,
+				parent_id parentId
+			FROM 
+				sys_menu
+		</select>
+		<!-- Integer getChildCount(Integer id), -->
+		<select id="getChildCount" resultType="java.lang.Integer">
+			SELECT COUNT(*) FROM
+				sys_menu
+			WHERE parent_id=#{id}
+		</select>
+		<!-- Integer deleteObject(Integer id), -->
+		<delete id="deleteObject">
+			DELETE FROM 
+				sys_menu
+			WHERE id=#{id}
+		</delete>
+		<!-- List<Map<String,Object>> findObjects(), -->
 		<select id="findObjects" resultType="java.util.Map">
 			SELECT
 				c.*,p.name parentName
@@ -11,7 +32,72 @@
 			LEFT JOIN 
 				sys_menu p
 			ON
-				c.parentId=p.id
+				c.parent_id=p.id
+		</select>
+		<!-- Integer saveObject(SysMenu sysMenu), -->
+		<insert id="saveObject" parameterType="com.jt.sys.entity.SysMenu"
+		keyProperty="id" useGeneratedKeys="true">
+			INSERT INTO 
+				sys_menu
+			VALUE(
+				NULL,
+				#{name},
+				#{url},
+				#{type},
+				#{sort},
+				#{note},
+				#{parentId},
+				#{permission},
+				#{createdTime},
+				#{modifiedTime},
+				#{createdUser},
+				#{modifiedUser}
+			)
+		</insert>
+		<!-- Integer countSameName(
+			@Param("name")String name,
+			@Param("parentId") Integer parentId); -->
+		<select id="countSameName" resultType="java.lang.Integer">
+			SELECT 
+				COUNT(*) 
+			FROM
+				sys_menu
+			WHERE
+				name=#{name} AND
+				parent_id=#{parentId}
+		</select>
+		<!-- Integer updateObject(SysMenu sysMenu); -->
+		<update id="updateObject" parameterType="com.jt.sys.entity.SysMenu">
+			UPDATE
+				name = #{name},
+				url = #{url},
+				type = #{type},
+				sort = #{sort},
+				note = #{note},
+				parent_id = #{parentId},
+				permission = #{permission},
+				modified_time = #{modifiedTime},
+				modifiedUser = #{modifiedUser}
+			SET
+				sys_menu
+			WHERE
+				id=#{id}
+		</update>
+		<!-- SysMenu selectObjectById(Integer id); -->
+		<select id="selectObjectById">
+			SELECT
+				id,
+				name,
+				url,
+				type,
+				sort,
+				note,
+				parent_id parentId,
+				permission
+			FROM
+				sys_menu
+			WHERE
+				id=#{id}
 		</select>
 	</mapper>
 	

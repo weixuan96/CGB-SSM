@@ -53,7 +53,7 @@
 		</select>
 		<!-- Integer insertObject(SysConfig sysConfig), -->
 		<insert id="insertObject" useGeneratedKeys="true"
-		keyProperty="id">
+		keyProperty="id" parameterType="com.jt.sys.entity.SysConfig">
 			INSERT INTO 
 				sys_config(
 				 name,

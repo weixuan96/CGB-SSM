@@ -1,4 +1,4 @@
-package com.jt.controller;
+package com.jt.sys.controller;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 /**

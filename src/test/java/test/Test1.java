@@ -1,15 +1,13 @@
 package test;
 
-import java.util.List;
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.jt.sys.mapper.SysMenuMapper;
+import com.jt.sys.entity.SysMenu;
+import com.jt.sys.service.SysMenuService;
 
 public class Test1 {
 	private AbstractApplicationContext ac = null;
@@ -19,11 +17,11 @@ public class Test1 {
 	}
 	@Test
 	public void test1() {
-		SysMenuMapper sys = ac.getBean("sysMenuMapper",SysMenuMapper.class);
-		List<Map<String,Object>> list = sys.findObjects();
-		for(Map<String,Object> map:list) {
-			System.out.println(map);
-		}
+		SysMenuService service  = ac.getBean("sysMenuService",SysMenuService.class);
+		SysMenu s = new SysMenu();
+		s.setName("删除");
+		s = service.saveObject(s);
+		System.out.println(s);
 	}
 	@After
 	public void destory() {
